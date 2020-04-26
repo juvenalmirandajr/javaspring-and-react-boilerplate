@@ -1,49 +1,8 @@
-It is finally time to bridge the gap between our front-end and back-end applications. In this article, we'll walk through how to put React applications inside your Spring codebase.
-
-## Getting Started
-
-```no-highlight
-et get java-spring-and-react
-cd java-spring-and-react
-idea .
-```
-
-## Learning Goals
-
-- Justify the need for a monorepo
-- Install and configure the `frontend-maven-plugin`
-- Establish full-stack filesystem conventions
-- Ensure React Components render in the context of the React application
-
-## The Need for a Monorepo
-
-Frontend, backend, or fullstack? This is very common question among developers and their toolchains. At Launch Academy, we believe it is important for your frontend and backend applications (and teams) to be well integrated. Organizationally, it allows us to better correlate changes as we add features, solidifies our automated testing configuration, and it helps with shared ownership of the code.
-
-So, we are strongly in favor of the **monorepo**. This means that we believe that both your frontend and backend code should exist in the same filesystem. Let's take a brief moment to explore the reasons why before we dive into building out our first monorepo with Spring and ReactJS.
-
-### Correlating Changes in Source Code Management
-
-Later, we'll introduce you to using `git` for source code management (SCM). Basically, this tool, and others like it, will help us keep track of how our code changes over time. Most source code management tools centralize around a concept of a **repository**, where all of our code changes are stored.
-
-Some organizations favor keeping our backend (in our case, Spring) repositories separated from our frontend applications (in our case, React). We think this is a bad idea, because as we add more features, it's harder to orchestrate releases and see how features change over time, because they'll be in separate repositories. Having all of the code in one repository allows developers to introduce features as a coherent whole: on the backend and subsequently on the frontend.
-
-### Continuous Integration
-
-Later, we'll also introduce you to Continuous Integration (CI). Continuous Integration is a systemic approach to feature development. As you build new features, CI build systems will run your tests repeatedly to ensure you haven't broken existing features or cause other issues with build integrity. Having your frontend and backend integrated into the same build system ensures that they will play together nicely.
-
-### Collective Code Ownership
-
-Lastly, and most importantly, there exists an Agile philosophy known as Collective Code Ownership. This is a cultural value among developers, in that every developer on the team should feel comfortable in all aspects of the system. This prevents territorial fiefdoms or walls among teams, and provides the organizations developers with flexibility when it comes to assigning project teams. If frontend applications and backend applications are separated, it's easy for a team to get either a) possessive or b) passive about one end of the platform's architecture. In such a team dynamic it's not uncommon to hear things like "Someone on the frontend team will have to fix that" when a bug occurs in production or "They don't understand our architectural approach" when a frontend team is taking on a large project. Practicing collective code ownership results in a more cohesive team, and more options for product managers when they're in a pinch for team resources.
-
-### The Case for Separate Repositories
-
-All that being said, there are practical reasons for separating. Maybe team proficiencies align in this way, and developers don't have the prerequisite knowledge to meaningfully contribute on both sides of the stack. Sometimes, security concerns *require* that the codebases be separate. Aside from such a rare security concern, most issues are cultural and can be addressed with good team and project management.
-
 ## Configuring the Frontend Maven Plugin
 
-Now that we've established the business benefits, let's get to the brass tax of setting up our codebase. To do so, we'll first need to install and configure a Maven plugin called `frontend-maven-plugin`.
+Setting up the codebase. To do so, first, install and configure a Maven plugin called `frontend-maven-plugin`.
 
-Let's add the following to the `<plugins>` section of our `pom.xml`.
+Add the following to the `<plugins>` section of the `pom.xml`.
 
 ```xml
 <plugin>
@@ -78,8 +37,7 @@ Let's add the following to the `<plugins>` section of our `pom.xml`.
   </executions>
 </plugin>
 ```
-
-You'll notice a few version directives that we'll have to configure. Let's put these in our `<properties>` section.
+Put these in the `<properties>` section.
 
 ```xml
 <properties>
@@ -92,11 +50,11 @@ You'll notice a few version directives that we'll have to configure. Let's put t
 
 ### Filesystem Conventions
 
-Like we place our `resources` in `src/main`, we will place our frontend code in `src/main/frontend`.
+Frontend code it will place in `src/main/frontend`.
 
 ### Setting Up Our React Application
 
-We'll need our `package.json` file, which we'll place in `src/main/frontend`. We will express this directory as our frontend root moving forward.
+The `package.json` file will place in `src/main/frontend`. This directory will express as the frontend root.
 
 ```json
 {
@@ -131,7 +89,7 @@ We'll need our `package.json` file, which we'll place in `src/main/frontend`. We
 }
 ```
 
-We'll also need a `.babelrc` file in our frontend root.
+Create `.babelrc` file in frontend root.
 
 ```json
 {
@@ -139,7 +97,7 @@ We'll also need a `.babelrc` file in our frontend root.
 }
 ```
 
-Next, we'll need to build our `webpack.config.js` in the frontend root.
+Build the `webpack.config.js` in the frontend root.
 
 ```javascript
 let WriteFilePlugin = require('write-file-webpack-plugin');
@@ -179,15 +137,11 @@ module.exports = {
 }
 ```
 
-Take a moment to study the top of this file. When `spring-boot:run` starts, the maven plugin will run webpack. Based on this configuration, spring boot and webpack will work together to install the bundled JavaScript file where all of our resulting Spring assets are located (the `target` directory). This will allow us to use the transpiled `bundle.js` in the context of our Spring templates and static resources.
+When `spring-boot:run` starts, the maven plugin will run webpack. Based on this configuration, spring boot and webpack will work together to install the bundled JavaScript file where all of our resulting Spring assets are located (the `target` directory). This will allow us to use the transpiled `bundle.js` in the context of our Spring templates and static resources.
 
-## Testing It All Out
+## Creating a Simple React Application
 
-Let's put it all together now.
-
-### Creating a Simple React Application
-
-Let's create our `app/main.js` file in our frontend root.
+Create `app/main.js` file in frontend root.
 
 ```javascript
 import React from 'react';
@@ -202,16 +156,13 @@ ReactDOM.render(
   document.getElementById('app')
 );
 ```
-
-*If some of this seems fuzzy to you, it may be a good time to go back and review some of the React material!*
-
 ### Creating a Static `index.html`
 
-Our resulting `bundle.js` file can be used safely in our thymeleaf templates and otherwise. To ensure everything is working, let's just add a static `index.html` in `src/main/resources/static/index.html`.
+The resulting `bundle.js` file can be used safely in our thymeleaf templates and otherwise. To ensure everything is working, let's just add a static `index.html` in `src/main/resources/static/index.html`.
 
 ```html
 <!DOCTYPE html>
-<html>
+<html lang="eng">
   <head>
     <title>Spring and React Sitting in a Tree</title>
   </head>
@@ -229,15 +180,11 @@ Based on the way we configured our `pom.xml`, our installation and transpiling w
 
 ### Development Flow
 
-If you want to develop a bit more rapidly, you can run a webpack dev server instance in your frontend root. So, with `spring-boot:run` running actively, you'll want to open a new terminal window and execute the following:
+You can run a webpack dev server instance in your frontend root. So, with `spring-boot:run` running actively, you'll want to open a new terminal window and execute the following:
 
 ```no-highlight
 cd src/main/frontend
 yarn run dev:client
 ```
 
-Like we practiced in the past, running the `dev:client` task will watch the frontend application filesystem for changes, and transpile with every modification.
-
-## Why This Matters
-
-Spring is awesome. React is awesome. Spring + React = Double Awesome. On a more serious note, we now have the "bridge" between our frontend and backend applications. In a subsequent lesson, we'll start issuing fetch requests from our React application against our Spring-based API's. You're on you way to becoming a fullstack developer.
+Running the `dev:client` task will watch the frontend application filesystem for changes, and transpile with every modification.
